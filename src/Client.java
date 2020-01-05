@@ -1,4 +1,9 @@
-public class Client extends Connection {
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+
+public class Client  {
     private int port;
     private String ip;
     public Client(String ip,int port){
@@ -6,12 +11,30 @@ public class Client extends Connection {
         this.port = port;
     }
 
-    @Override
-    public boolean isServer() {
-        return false;
+    public void startConnection() {
+        try {
+            System.out.println("Client's up");
+            Socket socket = new Socket(getIp(),getPort());
+            // create input, output stream
+            ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
+
+            System.out.println(outputStream);
+            Object object = new Object("if u see this object is sent","2");
+            while (true) {
+                outputStream.writeObject(object);
+                outputStream.reset();
+                object.setName("If u see this object's name is changed");
+                outputStream.writeObject(object);
+
+                Object object1 = (Object) inputStream.readObject();
+                System.out.println(object1.getName());
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
-    @Override
     public int getPort() {
         return port;
     }
