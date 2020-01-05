@@ -11,6 +11,10 @@ public class Client  {
         this.port = port;
     }
 
+    public void send (ObjectOutputStream out,Object data) throws IOException {
+        out.writeObject(data);
+        out.reset();
+    }
     public void startConnection() {
         try {
             System.out.println("Client's up");
@@ -22,11 +26,12 @@ public class Client  {
             System.out.println(outputStream);
             Object object = new Object("if u see this object is sent","2");
             while (true) {
-                outputStream.writeObject(object);
+                /*outputStream.writeObject(object);
                 outputStream.reset();
+                outputStream.writeObject(object);*/
+                send(outputStream,object);
                 object.setName("If u see this object's name is changed");
-                outputStream.writeObject(object);
-
+                send(outputStream,object);
                 Object object1 = (Object) inputStream.readObject();
                 System.out.println(object1.getName());
             }
