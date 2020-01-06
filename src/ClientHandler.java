@@ -12,6 +12,7 @@ class ClientHandler implements Runnable {
     private ObjectOutputStream outputStream;
     private InetAddress inetAddress;
 
+
     public ClientHandler(Server server, Socket socket) throws IOException {
         this.server = server;
         this.socket = socket;
@@ -21,15 +22,23 @@ class ClientHandler implements Runnable {
     }
 
     public void run() {
+        //create instances of client, bcuz if create in different mains, the number of instances will be reset
+        Client client = new Client ("localhost",server.getPort());
+        client.assignName(client.getID());
         System.out.printf("%s just connected...\n", inetAddress.getHostAddress());
+        System.out.println("who? "+ client.getName());
+
         try {
             while (true) {
                 // listening to this client
                 Message message = (Message) this.inputStream.readObject();
+                message.setSenderName(client.getName());
                 System.out.printf("[%s] %s said \"%s\"\n", message.getTime(),
                                                            message.getSenderName(),
                                                            message.getContent());
-                this.server.broadcast(message);
+
+                //write to all running threads except this one
+                this.server.writeToEveryoneExcept(message,this);
             }
         } catch (IOException e) {
             // client probably disconnected
@@ -39,6 +48,7 @@ class ClientHandler implements Runnable {
             System.out.println(e.getMessage());
         }
     }
+
 
     public void send(Message message) {
         try {

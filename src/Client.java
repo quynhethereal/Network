@@ -1,14 +1,20 @@
 import java.io.*;
 import java.net.Socket;
-import java.util.Scanner;
 
-public class Client extends Connection {
+public class Client {
+    private static int numberOfPlayers = 0;
+    int ID;
+    {
+        numberOfPlayers +=1;
+        ID = numberOfPlayers;
+    }
     private int port;
     private String ip;
     private String name;
     private Socket socket;
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
+    private boolean currentUser;
 
     public Client(String ip,int port) {
         this.ip = ip;
@@ -29,11 +35,12 @@ public class Client extends Connection {
             System.out.println("unable to connect to the server!");
             System.exit(69);
         }
-
-        promptClientName();
+        //FIXME: becuz each main keeps separate number of Client instances, name of this user will always be Green,
+        //FIXME: so maybe we don't need this?
+        //promptClientName();
         startListeningToTheServer();
 
-        System.out.printf("Hi %s, you can start chatting now!\n", this.name);
+        System.out.println("Hi player, you can start chatting now!\n");
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         String message = "";
@@ -44,7 +51,8 @@ public class Client extends Connection {
                     disconnect();
                     break;
                 }
-                Message new_message = new Message(this.name, message);
+
+                Message new_message = new Message(message);
                 this.outputStream.writeObject(new_message);
                 this.outputStream.reset();
             } catch (IOException e) {
@@ -62,34 +70,69 @@ public class Client extends Connection {
     }
 
     private void promptClientName() {
-        Scanner input = new Scanner(System.in);
-        System.out.print("Your name: ");
-        this.name = input.nextLine();
+        assignName(this.ID);
     }
 
+    public void assignName(int orderOfPlayers){
+        switch (orderOfPlayers){
+            case 1:
+                name = "Green";
+                break;
+            case 2:
+                name = "Red";
+                break;
+            case 3:
+                name = "Yellow";
+                break;
+            case 4:
+                name = "Blue";
+                break;
+        }
+    }
+    public void writeToAllExcept(String name) throws IOException, ClassNotFoundException {
+        this.name = name;
+        while (true) {
+            Message message = (Message) this.inputStream.readObject();
+            if (name.equals(getName())) {
+                continue;
+            }
+            System.out.printf("[%s] %s said \"%s\"\n",  message.getTime(),
+                                                        message.getSenderName(),
+                                                        message.getContent());
+        }
+    }
     private void startListeningToTheServer() {
         new Thread(() -> {
             try {
                 while (true) {
+
                     // listening to the server
                     Message message = (Message) this.inputStream.readObject();
-                    if (message.getSenderName().equals(this.name)) {
-                        // skip this message if this is the client sending it
-                        // FIXME: not a very nice solution, tbh. Try to not letting the server to broadcast my messages to me instead!
-                        continue;
-                    }
                     System.out.printf("[%s] %s said \"%s\"\n", message.getTime(),
                                                                message.getSenderName(),
                                                                message.getContent());
                 }
             } catch (IOException e) {
                 // server probably dissed me, fuck!
-                System.out.printf(e.getMessage());
+                System.out.println(e.getMessage());
             } catch (ClassNotFoundException e) {
                 // shits gone wild, idk what happened
                 System.out.println(e.getMessage());
             }
         }).start();
+    }
+
+    public int getID() {
+        return ID;
+    }
+
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public boolean isServer() {
@@ -103,4 +146,5 @@ public class Client extends Connection {
     public String getIp() {
         return ip;
     }
+
 }
