@@ -2,19 +2,12 @@ import java.io.*;
 import java.net.Socket;
 
 public class Client {
-    private static int numberOfPlayers = 0;
-    int ID;
-    {
-        numberOfPlayers +=1;
-        ID = numberOfPlayers;
-    }
     private int port;
     private String ip;
     private String name;
     private Socket socket;
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
-    private boolean currentUser;
 
     public Client(String ip,int port) {
         this.ip = ip;
@@ -42,8 +35,7 @@ public class Client {
 
         System.out.println("Hi player, you can start chatting now!\n");
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
-        String message = "";
+        String message ="";
         while (true) {
             try {
                 message = br.readLine();
@@ -69,38 +61,6 @@ public class Client {
         }
     }
 
-    private void promptClientName() {
-        assignName(this.ID);
-    }
-
-    public void assignName(int orderOfPlayers){
-        switch (orderOfPlayers){
-            case 1:
-                name = "Green";
-                break;
-            case 2:
-                name = "Red";
-                break;
-            case 3:
-                name = "Yellow";
-                break;
-            case 4:
-                name = "Blue";
-                break;
-        }
-    }
-    public void writeToAllExcept(String name) throws IOException, ClassNotFoundException {
-        this.name = name;
-        while (true) {
-            Message message = (Message) this.inputStream.readObject();
-            if (name.equals(getName())) {
-                continue;
-            }
-            System.out.printf("[%s] %s said \"%s\"\n",  message.getTime(),
-                                                        message.getSenderName(),
-                                                        message.getContent());
-        }
-    }
     private void startListeningToTheServer() {
         new Thread(() -> {
             try {
@@ -120,10 +80,6 @@ public class Client {
                 System.out.println(e.getMessage());
             }
         }).start();
-    }
-
-    public int getID() {
-        return ID;
     }
 
 

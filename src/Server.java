@@ -57,9 +57,8 @@ public class Server {
         for (ClientHandler client:this.connectionPool) {
             if (client == clientHandler)
                 continue;
-            else {
+            else
                 client.send(message);
-            }
         }
     }
     public boolean isServer() {

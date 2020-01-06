@@ -11,7 +11,13 @@ class ClientHandler implements Runnable {
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
     private InetAddress inetAddress;
-
+    private static int numberOfPlayers = 0;
+    int ID;
+    {
+        numberOfPlayers +=1;
+        ID = numberOfPlayers;
+    }
+    private String threadName;
 
     public ClientHandler(Server server, Socket socket) throws IOException {
         this.server = server;
@@ -19,26 +25,27 @@ class ClientHandler implements Runnable {
         this.outputStream = new ObjectOutputStream(this.socket.getOutputStream());
         this.inputStream = new ObjectInputStream(this.socket.getInputStream());
         this.inetAddress = socket.getInetAddress();
+        threadName = this.assignName(ID);
     }
 
     public void run() {
-        //create instances of client, bcuz if create in different mains, the number of instances will be reset
-        Client client = new Client ("localhost",server.getPort());
-        client.assignName(client.getID());
-        System.out.printf("%s just connected...\n", inetAddress.getHostAddress());
-        System.out.println("who? "+ client.getName());
 
+        System.out.printf("%s just connected...\n", inetAddress.getHostAddress());
+        System.out.println("who? "+ this.getThreadName());
         try {
             while (true) {
                 // listening to this client
                 Message message = (Message) this.inputStream.readObject();
-                message.setSenderName(client.getName());
+
+                //set sender name according to name of thread
+                message.setSenderName(getThreadName());
                 System.out.printf("[%s] %s said \"%s\"\n", message.getTime(),
                                                            message.getSenderName(),
                                                            message.getContent());
 
                 //write to all running threads except this one
                 this.server.writeToEveryoneExcept(message,this);
+
             }
         } catch (IOException e) {
             // client probably disconnected
@@ -49,6 +56,23 @@ class ClientHandler implements Runnable {
         }
     }
 
+    public String assignName(int orderOfPlayers){
+        switch (orderOfPlayers){
+            case 1:
+                threadName = "Green";
+                break;
+            case 2:
+                threadName = "Red";
+                break;
+            case 3:
+                threadName = "Yellow";
+                break;
+            case 4:
+                threadName = "Blue";
+                break;
+        }
+        return threadName;
+    }
 
     public void send(Message message) {
         try {
@@ -57,5 +81,9 @@ class ClientHandler implements Runnable {
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    public String getThreadName() {
+        return threadName;
     }
 }
