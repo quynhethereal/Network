@@ -43,6 +43,7 @@ class ClientHandler implements Runnable {
     public void send(Message message) {
         try {
             this.outputStream.writeObject(message);
+            this.outputStream.reset();
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }

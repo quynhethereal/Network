@@ -46,6 +46,7 @@ public class Client extends Connection {
                 }
                 Message new_message = new Message(this.name, message);
                 this.outputStream.writeObject(new_message);
+                this.outputStream.reset();
             } catch (IOException e) {
                 System.out.println(e.getMessage());
             }
