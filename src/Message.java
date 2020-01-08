@@ -2,9 +2,24 @@ import java.io.Serializable;
 import java.time.LocalTime;
 
 public class Message implements Serializable {
+    //FIXME: import classes from game board
+
+    /*    Player player = null;
+    Horse horse = null;
+    Dice dice = null;
+    int move;
+    */
+
+    /*Message(Player player, Horse horse, Dice dice){
+        this.senderName = player.getName();
+        this.horse = horse;
+        this.move = dice.getRollNo(); // right?
+    }
+    */
     String senderName = "";
     String content;
     LocalTime time = LocalTime.now();
+
 
     //FIXME: this may not be needed?
     Message(String senderName, String content) {

@@ -29,23 +29,27 @@ class ClientHandler implements Runnable {
     }
 
     public void run() {
-
         System.out.printf("%s just connected...\n", inetAddress.getHostAddress());
         System.out.println("who? "+ this.getThreadName());
         try {
             while (true) {
+                Object incomingMessage = this.inputStream.readObject();
                 // listening to this client
-                Message message = (Message) this.inputStream.readObject();
+                //TODO: WRITE A "PROCESS INPUT" METHOD
+                if (incomingMessage instanceof Message) {
+                    Message message = (Message) incomingMessage;
 
-                //set sender name according to name of thread
-                message.setSenderName(getThreadName());
-                System.out.printf("[%s] %s said \"%s\"\n", message.getTime(),
-                                                           message.getSenderName(),
-                                                           message.getContent());
-
-                //write to all running threads except this one
-                this.server.writeToEveryoneExcept(message,this);
-
+                    //set sender name according to name of thread
+                    message.setSenderName(getThreadName());
+                    System.out.printf("[%s] %s said \"%s\"\n", message.getTime(),
+                            message.getSenderName(),
+                            message.getContent());
+                    //write to all running threads except this one
+                    this.server.writeToEveryoneExcept(message, this);
+                }
+                else if (incomingMessage instanceof String){
+                    //TODO: receive "ready" status from user
+                }
             }
         } catch (IOException e) {
             // client probably disconnected
@@ -73,6 +77,7 @@ class ClientHandler implements Runnable {
         }
         return threadName;
     }
+
 
     public void send(Message message) {
         try {

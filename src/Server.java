@@ -16,16 +16,10 @@ public class Server {
     public void start() {
         new Thread(() -> {
            try {
-
                ServerSocket serverSocket = new ServerSocket(this.port);
                System.out.println("server started");
 
-               //TODO: GET INPUT FROM GUI
-               System.out.println("Enter number of players ");
-               Scanner input = new Scanner(System.in);
-               numberOfPlayers = input.nextInt();
-
-               while (counterForPlayers < numberOfPlayers) {
+               while (true) {
                    // waiting for a client to connect
                    Socket socket = serverSocket.accept();
                    // bingo! we got a connection
@@ -34,9 +28,6 @@ public class Server {
                    // the clients independently in the future
                    connectionPool.add(newConnection);
                    new Thread(newConnection).start();
-                   //count for number of players connected
-                   counterForPlayers++;
-                   System.out.println("Number of connected players is: " + counterForPlayers);
                }
            } catch (IOException e) {
                 System.out.println(e.getMessage());
